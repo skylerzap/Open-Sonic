@@ -20,3 +20,9 @@ Currently the engine only has sensors A and B and while there is Sonic running i
 To view information from the sensors, press B for Sensor A and press N for Sensor B. You need the Love2D console enabled for this to work.
 
 To enable the running currently, add a line that says "debug=true" to the love.load function.
+
+# Q&A
+
+Q: What inspired the name of this engine?
+
+A: Joe is a funny word.
