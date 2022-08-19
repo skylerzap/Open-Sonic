@@ -11,6 +11,8 @@ http://info.sonicretro.org/Sonic_Physics_Guide
 Engine made with Lua framework: Love2D
 https://love2d.org/
 
+Made because of the complexity of other Sonic Engines. (they don't use lua (the only programming language i know is lua))
+
 # Documentation
 
 Open the engine folder with Love2D either with drag and drop or via command lines. Other methods work too, such as with Love2D MSVC extensions.
