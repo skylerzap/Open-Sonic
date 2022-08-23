@@ -39,6 +39,11 @@ function love.load()
     p.yspeed=0
 end
 
+
+function sign(number)
+    return number > 0 and 1 or (number == 0 and 0 or -1)
+end
+
 function dump(o)
     if type(o) == 'table' then
        local s = '{ '
@@ -90,6 +95,10 @@ function love.update(dt)
             end
         end
     end
+
+    if not left and not right then
+        p.groundspeed = p.groundspeed-math.min(math.abs(p.groundspeed), p.frictionspeed) * sign(p.groundspeed)
+    end
     else
         if right then p.x=p.x+0.5 end
         if left then p.x=p.x-1 end
@@ -122,7 +131,7 @@ function love.update(dt)
         print("Sensor B Info.")
         print("X Position within tile: ".. math.floor(p.x+p.widthradius)-math.floor(tile1)*16)
         print("Y Position within tile: ".. math.floor(p.y+p.heightradius)-math.floor(tile2)*16)
-        print("Test Thing: ".. math.floor((p.y+p.heightradius)-math.floor(tile2)*16))
+        print("Test Thing: ".. math.floor((math.floor(p.y+p.heightradius)-math.floor(tile2)*16)-16)*-1)
         if tileprops[arraynumber] == nil then
             print("Tile Height: nil")
             print("Distance From Surface: nil")
@@ -138,24 +147,61 @@ function love.update(dt)
         print("Y (in tiles): ".. math.floor(tile2))
     end
     --Attempt at implementation stuff
+    --SENSOR B
     debug=false
     local tile1, tile2 = testlevel:convertPixelToTile(p.x+p.widthradius, p.y+p.heightradius)
     local tileprops = testlevel:getTileProperties(1,  math.floor(tile1+1), math.floor(tile2+1))
     local tilepropsregression = testlevel:getTileProperties(1,  math.floor(tile1+1), math.floor(tile2))
-    local tilepropsextension = testlevel:getTileProperties(1,  math.floor(tile1+1), math.floor(tile2-1))
+    local tilepropsextension = testlevel:getTileProperties(1,  math.floor(tile1+1), math.floor(tile2+2))
     local tilexpos = math.floor(p.x+p.widthradius)-math.floor(tile1)*16
     local arraynumber = tostring(tilexpos)
-    p.yspeed=0
-    if tileprops["full"] and tilepropsregression["solid"] == true and tilepropsregression[arraynumber]>=0 then
-            print("Distance From Surface: ".. (math.floor((p.y+p.heightradius)+tilepropsregression[arraynumber]-math.floor(tile2)*16)))
-            p.yspeed=math.floor(p.y+p.heightradius)+tilepropsregression[arraynumber]-math.floor(tile2)*16*-1
-        elseif tileprops["solid"] ==false  and tilepropsextension[arraynumber]>0 then
-            p.yspeed=(tileprops[arraynumber]+math.floor(p.y+p.heightradius)-math.floor(tile2+2)*16)
-        elseif tileprops["solid"] then
-        print("Distance From Surface: ".. (tileprops[arraynumber]+math.floor((p.y+p.heightradius)-math.floor(tile2+1)*16)))
-        p.yspeed=(tileprops[arraynumber]+math.floor(p.y+p.heightradius)-math.floor(tile2+1)*16)*-1-1
-    end
     p.x=p.x+p.groundspeed
+    sensorblength=0
+        if tileprops["solid"] then
+            print("Distance From Surface: ".. (tileprops[arraynumber]+math.floor((p.y+p.heightradius)-math.floor(tile2+1)*16)))
+            sensorblength=(tileprops[arraynumber]+math.floor(p.y+p.heightradius)-math.floor(tile2+1)*16)*-1-1
+        elseif tileprops[arraynumber] == 0 and tilepropsextension[arraynumber] >= 0 then
+                print("B Extension")
+                sensorblength=math.floor((math.floor(p.y+p.heightradius)-math.floor(tile2)*16)-16)*-1-1+16-tilepropsextension[arraynumber]
+                print(sensorblength)
+        elseif tileprops["full"] and tilepropsregression["solid"] == true and tilepropsregression[arraynumber]>=0 then
+            print("Regression")
+            print("Distance From Surface: ".. (math.floor(p.y+p.heightradius)+tilepropsregression[arraynumber]+math.floor(tile2)*16*-1))
+            sensorblength=(math.floor(p.y+p.heightradius)+tilepropsregression[arraynumber]+math.floor(tile2)*16)*-1
+
+        end
+        --SENSOR A
+        local tile1, tile2 = testlevel:convertPixelToTile(p.x-p.widthradius, p.y+p.heightradius)
+        local tileprops = testlevel:getTileProperties(1,  math.floor(tile1+1), math.floor(tile2+1))
+        local tilepropsregression = testlevel:getTileProperties(1,  math.floor(tile1+1), math.floor(tile2))
+        local tilepropsextension = testlevel:getTileProperties(1,  math.floor(tile1+1), math.floor(tile2+2))
+        local tilexpos = math.floor(p.x-p.widthradius)-math.floor(tile1)*16
+        local arraynumber = tostring(tilexpos)
+        p.x=p.x+p.groundspeed
+        sensoralength=0
+            if tileprops["solid"] then
+                print("Distance From Surface: ".. (tileprops[arraynumber]+math.floor((p.y+p.heightradius)-math.floor(tile2+1)*16)))
+                sensoralength=(tileprops[arraynumber]+math.floor(p.y+p.heightradius)-math.floor(tile2+1)*16)*-1-1
+            elseif tileprops[arraynumber] == 0 and tilepropsextension[arraynumber] >= 0 then
+                    print("A Extension")
+                    sensoralength=math.floor((math.floor(p.y+p.heightradius)-math.floor(tile2)*16)-16)*-1-1+16-tilepropsextension[arraynumber]
+                    print(sensoralength)
+            elseif tileprops["full"] and tilepropsregression["solid"] == true and tilepropsregression[arraynumber]>=0 then
+                print("Regression")
+                print("Distance From Surface: ".. (math.floor(p.y+p.heightradius)+tilepropsregression[arraynumber]+math.floor(tile2)*16*-1))
+                sensoralength=(math.floor(p.y+p.heightradius)+tilepropsregression[arraynumber]+math.floor(tile2)*16)*-1
+            end
+
+            if sensoralength<sensorblength then
+                p.y=p.y+sensoralength
+                print("A WON")
+            elseif sensorblength<sensoralength then
+                p.y=p.y+sensorblength
+                print("B WON")
+            elseif sensoralength==sensorblength then
+                p.y=p.y+sensoralength
+                print("BOTH WERE EQUAL")
+            end
     p.y=p.y+p.yspeed
 end
 
@@ -164,8 +210,8 @@ function love.draw()
     love.graphics.setColor(1, 1, 1)
     testlevel:draw(0,0,2,2)
     love.graphics.setColor(0, 1, 0)
-    love.graphics.rectangle("line", p.x-p.widthradius, p.y+p.heightradius , 1, 1 )
-    love.graphics.rectangle("line", p.x+p.widthradius, p.y+p.heightradius, 1, 1 )
+    love.graphics.rectangle("line", p.x-p.widthradius, p.y+p.heightradius , 0.5, 0.5 )
+    love.graphics.rectangle("line", p.x+p.widthradius, p.y+p.heightradius, 0.5, 0.5 )
     love.graphics.setColor(1, 1, 1)
     --love.graphics.rectangle("fill", math.floor(p.x+p.widthradius+p.heightradius/16)*8, math.floor(p.x-p.widthradius+p.heightradius+p.y/16)*8,8,8)
     local tile1, tile2 = testlevel:convertPixelToTile(p.x-p.widthradius, p.y+p.heightradius+16)
@@ -174,5 +220,4 @@ function love.draw()
     --love.graphics.rectangle("fill", math.floor(tile1/1)*16, math.floor(tile2)*16, 16,16)
     --print(math.floor(p.x-p.widthradius/16))
     --print(p.x-p.widthradius/8)
-
 end
