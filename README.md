@@ -28,3 +28,5 @@ To enable the running currently, add a line that says "debug=true" to the love.l
 Q: What inspired the name of this engine?
 
 A: Joe is a funny word.
+
+note to self: to make the extension work, do this [Y POS WITHIN TILE] + 16 - [HEIGHT OF EXTENSION TILE]
