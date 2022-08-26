@@ -66,6 +66,10 @@ function dump(o)
     end
  end
 
+function toradians(n)
+	reutrn(n*0.01745329)
+end
+
 function love.update(dt)
     if dt < 1/60 then
         love.timer.sleep(1/60 - dt)
