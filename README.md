@@ -1,5 +1,6 @@
 # Sonic-Joe-Engine
 sonic engine im working on.
+DO NOT WORRY, the engine is still being worked on. I just haven't posted the updates here in a while.
 
 Simple Tiled Implementation by karai17
 https://github.com/karai17/Simple-Tiled-Implementation
