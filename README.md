@@ -1,5 +1,8 @@
 # Sonic-Joe-Engine
 sonic engine im working on.
+
+Engine is far from usable right now, check back on this project in a month and see if it's usable.
+
 DO NOT WORRY, the engine is still being worked on. I just haven't posted the updates here in a while.
 
 Simple Tiled Implementation by karai17
