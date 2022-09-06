@@ -13,7 +13,7 @@ function love.load()
     love.graphics.setDefaultFilter( 'nearest', 'nearest' )
     sonic = love.graphics.newImage("somic.png")
     p = {}
-    p.x=10*16
+    p.x=10*12+0.5
     p.y=12*16+0.5-4
     p.xspeed=0
     p.yspeed=0
@@ -200,14 +200,15 @@ function love.update(dt)
 	local right = love.keyboard.isScancodeDown('right')
     local a = love.keyboard.isScancodeDown('a')
     local s = love.keyboard.isScancodeDown('s')
-            if not debug then
+     if not debug then
         --Control Lock Attempt
         if p.grounded then
             if p.controllocktimer==0 then
                 if math.abs( p.groundspeed ) < 2.5 and p.groundangle>45 and p.groundangle<316 then
                     --p.grounded=false
-                    --p.groundspeed=0
-                    --p.controllocktimer=30
+                    p.groundspeed=0
+                    --p.groundangle=0
+                    p.controllocktimer=30
                 end
             else
                 p.controllocktimer=p.controllocktimer-1
@@ -262,14 +263,19 @@ function love.update(dt)
             if not left and not right then
                 p.groundspeed = p.groundspeed-math.min(math.abs(p.groundspeed), p.frictionspeed) * sign(p.groundspeed)
             end
+                    --JUMP TEST
+        if a or s then
+            p.xspeed = p.xspeed - p.jumpforce * math.sin(p.groundangle*0.0174533)
+            p.yspeed = p.yspeed - p.jumpforce * math.cos(p.groundangle*0.0174533)
+            p.grounded=false
+        end
         else
-            p.yspeed=p.yspeed+p.gravityforce
             if p.yspeed>16 then p.yspeed=16 end
             if p.yspeed<0 and p.yspeed>-4 then
                 p.xspeed=p.xspeed-((p.xspeed/0.125)/256)
             end
+            p.yspeed=p.yspeed+p.gravityforce
         end
-
                 --Attempt at implementation stuff
                 if math.abs(p.xspeed) >= math.abs(p.yspeed) then
                     if p.xspeed>0 then
@@ -290,6 +296,7 @@ function love.update(dt)
                 end
                 
     --SENSORS E + F        
+    if p.grounded then
         if p.xspeed>0 and p.mode==1 then
             p.sensorfxpos= p.x + p.pushradius + p.xspeed
             p.sensorfypos= p.y + p.yspeed
@@ -313,21 +320,58 @@ function love.update(dt)
                 p.groundspeed=0
             end
         end
+    else
+        if p.mostdirection=="right" or p.mostdirection=="up" or p.mostdirection=="down" then
+            p.sensorfxpos= p.x + p.pushradius + p.xspeed
+            p.sensorfypos= p.y + p.yspeed
+            if p.groundangle==0 then
+                p.sensorfypos=p.y+p.yspeed+8
+            end
+            sensorflength, sensorfangle = sensorwallfork(p.sensorfxpos,p.sensorfypos,"right")
+            if sensorflength<0 then
+                p.xspeed=p.xspeed+sensorflength
+                p.groundspeed=0
+            end
+        elseif p.mostdirection=="left" or p.mostdirection=="up" or p.mostdirection=="down"then
+            p.sensorexpos= p.x - p.pushradius + p.xspeed
+            p.sensoreypos= p.y + p.yspeed
+            if p.groundangle==0 then
+                p.sensoreypos=p.y+p.yspeed+8
+            end
+            sensorelength, sensoreangle = sensorwallfork(p.sensorexpos,p.sensoreypos,"left")
+            if sensorelength>0 then
+                p.xspeed=p.xspeed+sensorelength
+                p.groundspeed=0
+            end
+        end
+    end
     --MOVE PLAYER
         p.x = p.x + p.xspeed
         p.y = p.y + p.yspeed
     print(p.yspeed)
     print(p.mostdirection)
+    if p.mode==1 then
+        p.sensoraxpos=p.x-p.widthradius
+        p.sensoraypos=p.y+p.heightradius
+        p.sensorbxpos=p.x+p.widthradius
+        p.sensorbypos=p.y+p.heightradius
+    elseif p.mode==2 then
+        p.sensorbxpos=p.x+p.heightradius
+        p.sensorbypos=p.y+p.widthradius
+        p.sensoraxpos=p.x+p.heightradius
+        p.sensoraypos=p.y-p.widthradius
+    else
+        p.sensoraxpos=p.x-p.widthradius
+        p.sensoraypos=p.y+p.heightradius
+        p.sensorbxpos=p.x+p.widthradius
+        p.sensorbypos=p.y+p.heightradius
+    end
     --SENSORS A + B
     if p.grounded then
     if p.mode==1 then --Mode 1 is Floor Mode
     --SENSOR B
-    p.sensorbxpos=p.x+p.widthradius
-    p.sensorbypos=p.y+p.heightradius
         sensorblength, sensorbgroundangle = sensor(p.sensorbxpos,p.sensorbypos,"down")
         --SENSOR A
-    p.sensoraxpos=p.x-p.widthradius
-    p.sensoraypos=p.y+p.heightradius
        sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "down")
 
             if sensoralength<sensorblength then
@@ -359,12 +403,8 @@ function love.update(dt)
             end
         elseif p.mode==2 then --Mode 2 is Right Wall
     --SENSOR B RIGHT WALL
-    p.sensorbxpos=p.x+p.heightradius
-    p.sensorbypos=p.y+p.widthradius
     sensorblength, sensorbgroundangle = sensor(p.x+p.heightradius,p.y+p.widthradius, "right")
         --SENSOR A RIGHT WALL
-        p.sensoraxpos=p.x+p.heightradius
-        p.sensoraypos=p.y-p.widthradius
         sensoralength, sensoragroundangle = sensor(p.x+p.heightradius,p.y-p.widthradius, "right")
 
             if sensoralength<sensorblength then
@@ -402,14 +442,104 @@ function love.update(dt)
         end
     end
 
+    if p.grounded==false and p.mostdirection=="right" or p.mostdirection=="left" or p.mostdirection=="down" then
+        if p.mode==1 then --Mode 1 is Floor Mode
+        --SENSOR B
+            sensorblength, sensorbgroundangle = sensor(p.sensorbxpos,p.sensorbypos,"down")
+            --SENSOR A
+           sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "down")
+            if sensoralength>=-(p.yspeed+8) or sensorblength>=-(p.yspeed+8) then
+                if sensoralength<sensorblength then
+                    if sensoralength<=0 then
+                        p.y=p.y+sensoralength
+                        p.grounded=true
+                    end
+                    if sensoragroundangle==366 then
+                        p.groundangle=math.floor(p.groundangle/90+0.5)*90
+                    else
+                        p.groundangle=sensoragroundangle
+                    end
+                    print(sensoragroundangle)
+                    print("A WON")
+                elseif sensorblength<sensoralength then
+                    if sensorblength<=0 then
+                        p.y=p.y+sensorblength
+                        p.grounded=true
+                    end
+                    if sensorbgroundangle==366 then
+                        p.groundangle=math.floor(p.groundangle/90+0.5)*90
+                    else
+                        p.groundangle=sensorbgroundangle
+                    end
+                    print(sensorbgroundangle)
+                    print("B WON")
+                elseif sensoralength==sensorblength then
+                    if sensoralength<=0 then
+                        p.y=p.y+sensoralength
+                        p.grounded=true
+                    end
+                    if sensoragroundangle==366 then
+                        p.groundangle=math.floor(p.groundangle/90+0.5)*90
+                    else
+                        p.groundangle=sensoragroundangle
+                    end
+                    print("BOTH WERE EQUAL")
+                end
+            end
+            elseif p.mode==2 then --Mode 2 is Right Wall
+        --SENSOR B RIGHT WALL
+        sensorblength, sensorbgroundangle = sensor(p.x+p.heightradius,p.y+p.widthradius, "right")
+            --SENSOR A RIGHT WALL
+            sensoralength, sensoragroundangle = sensor(p.x+p.heightradius,p.y-p.widthradius, "right")
+            if sensoralength>=-(p.yspeed+8) or sensorblength>=-(p.yspeed+8) then
+                if sensoralength<sensorblength then
+                    if sensoralength<=0 then
+                    p.x=p.x+sensoralength
+                    p.grounded=true
+                    end
+                    if sensoragroundangle==366 then
+                        p.groundangle=math.floor(p.groundangle/90+0.5)*90
+                    else
+                        p.groundangle=sensoragroundangle
+                    end
+                    print(sensoragroundangle)
+                    print("A WON")
+                elseif sensorblength<sensoralength then
+                    if sensorblength<=0 then
+                    p.x=p.x+sensorblength
+                    p.grounded=true
+                    end
+                    if sensorbgroundangle==366 then
+                        p.groundangle=math.floor(p.groundangle/90+0.5)*90
+                    else
+                        p.groundangle=sensorbgroundangle
+                    end
+                    print(sensorbgroundangle)
+                    print("B WON")
+                elseif sensoralength==sensorblength then
+                    if sensoralength<=0 then
+                    p.x=p.x+sensoralength
+                    p.grounded=true
+                    end
+                    if sensoragroundangle==366 then
+                        p.groundangle=math.floor(p.groundangle/90+0.5)*90
+                    else
+                        p.groundangle=sensoragroundangle
+                    end
+                    print(p.groundangle)
+                    print("BOTH WERE EQUAL")
+                end
+            end
+
             else
                 if right then p.x=p.x+0.5 end
                 if left then p.x=p.x-1 end
                 if down then p.y=p.y+0.5 end
                 if up then p.y=p.y-1 end
             end
+        end
 end
-
+end
 function love.draw()
     love.graphics.scale(2,2)
     love.graphics.draw(sonic, p.x-p.widthradius-7-8*16,p.y-p.heightradius)
