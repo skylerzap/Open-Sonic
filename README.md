@@ -33,4 +33,7 @@ Q: What inspired the name of this engine?
 
 A: Joe is a funny word.
 
-note to self: to make the extension work, do this [Y POS WITHIN TILE] + 16 - [HEIGHT OF EXTENSION TILE]
+
+Q: Why use Lua instead of something like GameMaker?
+
+A: I actually don't know.
