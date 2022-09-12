@@ -59,7 +59,7 @@ end
 
 function sensor(sensorx, sensory, direction)
     if direction == "down" then
-        local tile1, tile2 = testlevel:convertPixelToTile(sensorx, sensory)
+        local tile1, tile2 = testlevel:convertPixelToTile(math.floor(sensorx), math.floor(sensory))
         local tileprops = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2 + 1))
         local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2))
         local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2 + 2))
@@ -68,27 +68,22 @@ function sensor(sensorx, sensory, direction)
         local sensorlength = 0
         local sensorgroundangle = 0
         if tileprops["solid"] then
-            --                print("Distance From Surface: ".. (tileprops[arraynumber]+math.floor((sensory)-math.floor(tile2+1)*16)))
             sensorlength = (tileprops[arraynumber] + math.floor(sensory) - math.floor(tile2 + 1) * 16) * -1 - 1
             sensorgroundangle = tileprops["angle"]
         elseif tileprops[arraynumber] == 0 and tilepropsextension["solid"] then
-            --                    print("B Extension")
             sensorlength = math.floor((math.floor(sensory) - math.floor(tile2) * 16) - 16) * -1 - 1 + 16 -
                                tilepropsextension[arraynumber]
             sensorgroundangle = tilepropsextension["angle"]
-            --                    print(sensorgroundangle)
         elseif tileprops["full"] and tilepropsregression["solid"] then
-            --                print("Regression")
-            --                print("Distance From Surface: ".. (math.floor(sensory)+tilepropsregression[arraynumber]+math.floor(tile2)*16*-1))
             sensorlength = (math.floor(sensory) + tilepropsregression[arraynumber] + math.floor(tile2) * 16) * -1
             sensorgroundangle = tilepropsregression["angle"]
         else
-            sensorlength=32
+            sensorlength = 32
         end
         return sensorlength, sensorgroundangle
     elseif direction == "right" then
-        local tile1, tile2 = testlevel:convertPixelToTile(sensorx, sensory)
-        local tileprops = testlevel:getTileProperties(1, math.floor(tile1+1), math.floor(tile2 + 1))
+        local tile1, tile2 = testlevel:convertPixelToTile(math.floor(sensorx), math.floor(sensory))
+        local tileprops = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2 + 1))
         local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1 - 0), math.floor(tile2 + 1))
         local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1 + 2), math.floor(tile2 + 1))
         local tilexpos = -(math.floor(sensory) - math.floor(tile2) * 16 - 16) - 1
@@ -96,25 +91,26 @@ function sensor(sensorx, sensory, direction)
         local arraynumber = "w" .. tostring(tilexpos)
         local sensorlength = 0
         if tileprops["solid"] and not tileprops["full"] then
-            sensorlength = (-math.floor(sensorx) + math.floor(tile1) * 16 - tileprops[arraynumber]) + 16
+            sensorlength = (-math.floor(sensorx) + math.floor(tile1) * 16 - tileprops[arraynumber]) + 15
             sensorgroundangle = tileprops["angle"]
         elseif tileprops[arraynumber] == 0 and tilepropsextension["solid"] then
             --                    print("B Extension")
-            sensorlength = ((math.floor(sensorx) - math.floor(tile1) * 16)) * -1 - 1 - tilepropsextension[arraynumber] + 32
+            sensorlength = ((math.floor(sensorx) - math.floor(tile1) * 16)) * -1 - 1 - tilepropsextension[arraynumber] +
+                               32
             sensorgroundangle = tilepropsextension["angle"]
-                print("extension")
+            print("extension")
         elseif tileprops[arraynumber] == 16 and tilepropsregression["solid"] then
-                            print("Regression")
+            print("Regression")
             --                print("Distance From Surface: ".. (math.floor(sensory)+tilepropsregression[arraynumber]+math.floor(tile1)*16*-1))
-            sensorlength = (math.floor(sensorx) - math.floor(tile1) * 16 + tilepropsregression[arraynumber])-16
+            sensorlength = (math.floor(sensorx) - math.floor(tile1) * 16 + tilepropsregression[arraynumber]) - 32 + 16
             sensorgroundangle = tilepropsregression["angle"]
         end
-        if sensorgroundangle==nil then
-            sensorgroundangle=0
+        if sensorgroundangle == nil then
+            sensorgroundangle = 0
         end
         return sensorlength, sensorgroundangle
     elseif direction == "up" then
-        local tile1, tile2 = testlevel:convertPixelToTile(sensorx, sensory)
+        local tile1, tile2 = testlevel:convertPixelToTile(math.floor(sensorx), math.floor(sensory))
         local tileprops = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2 + 1))
         local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2))
         local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1), math.floor(tile2 + 2))
@@ -144,15 +140,16 @@ end
 
 function sensorwallfork(sensorx, sensory, direction)
     if direction == "right" then
-        local tile1, tile2 = testlevel:convertPixelToTile(sensorx , sensory)
+        sensorx = sensorx + 15
+        local tile1, tile2 = testlevel:convertPixelToTile(sensorx - 15, sensory)
         local tileprops = testlevel:getTileProperties(1, math.floor(tile1), math.floor(tile2))
-        local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1-1), math.floor(tile2))
+        local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1 - 1), math.floor(tile2))
         local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2))
         local tilexpos = -(math.floor(sensory) - math.floor(tile2) * 16 - 16) - 1
         print(tilexpos)
         local arraynumber = "w" .. tostring(tilexpos)
         local sensorlength = 0
-        if not tileprops[arraynumber] == 0 and not tileprops[arraynumber]==16 then
+        if not tileprops[arraynumber] == 0 and not tileprops[arraynumber] == 16 then
             --        print("Distance From Surface: ".. (tileprops[arraynumber]+math.floor((p.x+p.heightradius)-math.floor(tile1)*16)))
             --                print("Normal B")
             sensorlength = (-sensorx + math.floor(tile1) * 16 - tileprops[arraynumber]) + 16
@@ -165,9 +162,9 @@ function sensorwallfork(sensorx, sensory, direction)
             --                    print("B Length (Extension): ".. sensorblength)
             --                    print("B ground angle: ".. sensorbgroundangle)
         elseif tileprops[arraynumber] == 16 then
-                            print("Regression")
+            print("Regression")
             --                print("Distance From Surface: ".. (math.floor(sensory)+tilepropsregression[arraynumber]+math.floor(tile1)*16*-1))
-            sensorlength = (sensorx - math.floor(tile1) * 16 + tilepropsregression[arraynumber])-15
+            sensorlength = (sensorx - math.floor(tile1) * 16 + tilepropsregression[arraynumber]) - 15
             sensorgroundangle = tilepropsregression["angle"]
         end
         return sensorlength, sensorgroundangle
@@ -360,7 +357,7 @@ function love.update(dt)
                     if sensoragroundangle == 366 then
                         p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
                     else
-                        p.groundangle = sensoragroundangle
+                        p.groundangle = sensorbgroundangle
                     end
                     print("BOTH WERE EQUAL")
                 end
@@ -374,30 +371,37 @@ function love.update(dt)
                 sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "right")
 
                 if sensoralength < sensorblength then
-                    p.x = p.x + math.floor(sensoralength)
+              --      if not math.floor(sensoralength) == 0 then
+                        p.x = p.x + math.floor(sensoralength)
                     if sensoragroundangle == 366 then
                         p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
                     else
                         p.groundangle = sensoragroundangle
                     end
+             --   end
                     print(sensoralength)
                     print("A WON")
                 elseif sensorblength < sensoralength then
-                    p.x = p.x + math.floor(sensorblength)
+               --     if not math.floor(sensorblength) == 0 then
+                        p.x = p.x + math.floor(sensorblength)
+                    
                     if sensorbgroundangle == 366 then
                         p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
                     else
                         p.groundangle = sensorbgroundangle
                     end
+               -- end
                     print(sensorblength)
                     print("B WON")
                 elseif sensoralength == sensorblength then
-                    p.x = p.x + math.floor(sensoralength)
-                    if sensoragroundangle == 366 then
-                        p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                    else
-                        p.groundangle = sensoragroundangle
-                    end
+                    --if not math.floor(sensoralength) == 0 then
+                        p.x = p.x + math.floor(sensoralength)
+                        if sensoragroundangle == 366 then
+                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                        else
+                            p.groundangle = sensoragroundangle
+                        end
+                    --end
                     print(sensoralength)
                     print("BOTH WERE EQUAL")
                 end
@@ -541,7 +545,7 @@ function love.update(dt)
                     if sensoralength < sensorblength then
                         if sensoralength < 0 then
                             p.y = p.y + sensoralength
-                     --       p.groundspeed = p.xspeed
+                            --       p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensoragroundangle == 366 then
                                 p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
@@ -556,7 +560,7 @@ function love.update(dt)
                     elseif sensorblength < sensoralength then
                         if sensorblength < 0 then
                             p.y = p.y + sensorblength
-                   --         p.groundspeed = p.xspeed
+                            --         p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensorbgroundangle == 366 then
                                 p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
@@ -571,7 +575,7 @@ function love.update(dt)
                     elseif sensoralength == sensorblength then
                         if sensoralength < 0 then
                             p.y = p.y + sensoralength
-                      --      p.groundspeed = p.xspeed
+                            --      p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensoragroundangle == 366 then
                                 p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
@@ -595,7 +599,7 @@ function love.update(dt)
                     if sensoralength < sensorblength then
                         if sensoralength < 0 then
                             p.y = p.y + sensoralength
-                         --   p.groundspeed = p.xspeed
+                            --   p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensoragroundangle == 366 then
                                 p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
@@ -610,7 +614,7 @@ function love.update(dt)
                     elseif sensorblength < sensoralength then
                         if sensorblength < 0 then
                             p.y = p.y + sensorblength
-                          --  p.groundspeed = p.xspeed
+                            --  p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensorbgroundangle == 366 then
                                 p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
@@ -625,7 +629,7 @@ function love.update(dt)
                     elseif sensoralength == sensorblength then
                         if sensoralength < 0 then
                             p.y = p.y + sensoralength
-                            --p.groundspeed = 0
+                            -- p.groundspeed = 0
                             p.grounded = true
                             if sensoragroundangle == 366 then
                                 p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
@@ -647,10 +651,10 @@ function love.update(dt)
                     p.groundangle = p.groundangle + 2.8125
                 end
             else
-                p.groundangle=0
+                p.groundangle = 0
                 p.widthradius = 9
                 p.heightradius = 19
-                p.y=p.y-5
+                -- p.y = p.y - 5
             end
         end
     end
