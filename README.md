@@ -29,7 +29,12 @@ To enable the running currently, add a line that says "debug=true" to the love.l
 
 # Q&A
 
-Q: What inspired the name of this engine?
+Q: What inspired the name of this engine? (Open Sonic)
+
+A: Well the engine is open source, and it's Sonic.
+
+
+Q: What inspired the name of this engine? (Joe Engine)
 
 A: Joe is a funny word.
 
