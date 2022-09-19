@@ -1,4 +1,4 @@
-# Open Sonic (Formally Sonic-Joe-Engine)
+# Open Sonic (Formerly Sonic-Joe-Engine)
 sonic engine im working on.
 
 Engine is far from usable right now, check back on this project in a month and see if it's usable.
