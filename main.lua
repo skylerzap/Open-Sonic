@@ -1,9 +1,9 @@
---░█████╗░██████╗░███████╗███╗░░██╗  ░██████╗░█████╗░███╗░░██╗██╗░█████╗░
---██╔══██╗██╔══██╗██╔════╝████╗░██║  ██╔════╝██╔══██╗████╗░██║██║██╔══██╗
---██║░░██║██████╔╝█████╗░░██╔██╗██║  ╚█████╗░██║░░██║██╔██╗██║██║██║░░╚═╝
---██║░░██║██╔═══╝░██╔══╝░░██║╚████║  ░╚═══██╗██║░░██║██║╚████║██║██║░░██╗
---╚█████╔╝██║░░░░░███████╗██║░╚███║  ██████╔╝╚█████╔╝██║░╚███║██║╚█████╔╝
---░╚════╝░╚═╝░░░░░╚══════╝╚═╝░░╚══╝  ╚═════╝░░╚════╝░╚═╝░░╚══╝╚═╝░╚════╝░
+-- ░█████╗░██████╗░███████╗███╗░░██╗  ░██████╗░█████╗░███╗░░██╗██╗░█████╗░
+-- ██╔══██╗██╔══██╗██╔════╝████╗░██║  ██╔════╝██╔══██╗████╗░██║██║██╔══██╗
+-- ██║░░██║██████╔╝█████╗░░██╔██╗██║  ╚█████╗░██║░░██║██╔██╗██║██║██║░░╚═╝
+-- ██║░░██║██╔═══╝░██╔══╝░░██║╚████║  ░╚═══██╗██║░░██║██║╚████║██║██║░░██╗
+-- ╚█████╔╝██║░░░░░███████╗██║░╚███║  ██████╔╝╚█████╔╝██║░╚███║██║╚█████╔╝
+-- ░╚════╝░╚═╝░░░░░╚══════╝╚═╝░░╚══╝  ╚═════╝░░╚════╝░╚═╝░░╚══╝╚═╝░╚════╝░
 -- Prototype Release 1
 -- Made by Evanzap
 function love.load()
@@ -236,10 +236,9 @@ function love.update(dt)
         if p.grounded then
             if p.controllocktimer == 0 then
                 if math.abs(p.groundspeed) < 2.5 and p.groundangle > 45 and p.groundangle < 316 then
-                    -- p.grounded=false
-                    -- p.groundspeed = 0
-                    -- p.groundangle=0
-                    -- p.controllocktimer = 30
+                    --p.grounded=false
+                    --p.groundspeed = 0
+                    --p.controllocktimer = 30
                 end
             else
                 p.controllocktimer = p.controllocktimer - 1
@@ -255,8 +254,6 @@ function love.update(dt)
                 left = false
                 right = false
             end
-            p.xspeed = p.groundspeed * math.cos(p.groundangle * 0.0174533)
-            p.yspeed = p.groundspeed * -math.sin(p.groundangle * 0.0174533)
             if a or s then
                 p.jumppressed = true
                 p.grounded = false
@@ -322,13 +319,34 @@ function love.update(dt)
                 end
             end
             -- MOVE PLAYER
+            if p.grounded then
+                p.xspeed = p.groundspeed * math.cos(p.groundangle * 0.0174533)
+                p.yspeed = p.groundspeed * -math.sin(p.groundangle * 0.0174533)
+            end
             p.x = p.x + p.xspeed
             p.y = p.y + p.yspeed
             if p.groundangle >= 360 then
                 p.groundangle = 0
             end
+            if p.groundangle>=0 and p.groundangle<=45 then
+                p.mode=1
+            elseif p.groundangle>=46 and p.groundangle<=134 then
+                p.mode=2
+            end
+
+            if p.mode==1 then
+                p.sensoraxpos=p.x-p.widthradius
+                p.sensoraypos=p.y+p.heightradius
+                p.sensorbxpos=p.x+p.widthradius
+                p.sensorbypos=p.y+p.heightradius
+            elseif p.mode==2 then
+                p.sensoraypos=p.y+p.widthradius
+                p.sensoraxpos=p.x+p.heightradius
+                p.sensorbypos=p.y-p.widthradius
+                p.sensorbxpos=p.x+p.heightradius
+            end
             -- SENSORS A + B
-            if p.mode == 1 then -- Mode 1 is Floor Mode
+            if p.mode==1 then -- Mode 1 is Floor Mode
                 -- SENSOR B
                 sensorblength, sensorbgroundangle = sensor(p.sensorbxpos, p.sensorbypos, "down")
                 -- SENSOR A
@@ -361,73 +379,50 @@ function love.update(dt)
                     end
                     print("BOTH WERE EQUAL")
                 end
-                if p.groundangle > 45 then
-                    p.mode = 2
-                end
-            elseif p.mode == 2 then -- Mode 2 is Right Wall
+            elseif p.mode==2 then -- Mode 2 is Right Wall
                 -- SENSOR B RIGHT WALL
                 sensorblength, sensorbgroundangle = sensor(p.sensorbxpos, p.sensorbypos, "right")
                 -- SENSOR A RIGHT WALL
                 sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "right")
 
                 if sensoralength < sensorblength then
-              --      if not math.floor(sensoralength) == 0 then
-                        p.x = p.x + math.floor(sensoralength)
+                    --      if not math.floor(sensoralength) == 0 then
+                    p.x = p.x + math.floor(sensoralength)
                     if sensoragroundangle == 366 then
                         p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
                     else
                         p.groundangle = sensoragroundangle
                     end
-             --   end
+                    --   end
                     print(sensoralength)
                     print("A WON")
                 elseif sensorblength < sensoralength then
-               --     if not math.floor(sensorblength) == 0 then
-                        p.x = p.x + math.floor(sensorblength)
-                    
+                    --     if not math.floor(sensorblength) == 0 then
+                    p.x = p.x + math.floor(sensorblength)
                     if sensorbgroundangle == 366 then
                         p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
                     else
                         p.groundangle = sensorbgroundangle
                     end
-               -- end
+                    -- end
                     print(sensorblength)
                     print("B WON")
                 elseif sensoralength == sensorblength then
-                    --if not math.floor(sensoralength) == 0 then
-                        p.x = p.x + math.floor(sensoralength)
-                        if sensoragroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensoragroundangle
-                        end
-                    --end
+                    -- if not math.floor(sensoralength) == 0 then
+                    p.x = p.x + math.floor(sensorblength)
+                    if sensoragroundangle == 366 then
+                        p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                    else
+                        p.groundangle = sensoragroundangle
+                    end
+                    -- end
                     print(sensoralength)
                     print("BOTH WERE EQUAL")
-                end
-                if p.groundangle < 46 then
-                    p.mode = 1
                 end
             elseif mode == "ceiling" then
 
             elseif mode == "leftwall" then
 
-            end
-            if p.mode == 1 then
-                p.sensoraxpos = p.x - p.widthradius
-                p.sensoraypos = p.y + p.heightradius
-                p.sensorbxpos = p.x + p.widthradius
-                p.sensorbypos = p.y + p.heightradius
-            elseif p.mode == 2 then
-                p.sensorbxpos = p.x + p.heightradius
-                p.sensorbypos = p.y + p.widthradius
-                p.sensoraxpos = p.x + p.heightradius
-                p.sensoraypos = p.y - p.widthradius
-            else
-                p.sensoraxpos = p.x - p.widthradius
-                p.sensoraypos = p.y + p.heightradius
-                p.sensorbxpos = p.x + p.widthradius
-                p.sensorbypos = p.y + p.heightradius
             end
         else
             -- QUADRANT THING
@@ -544,7 +539,7 @@ function love.update(dt)
                 if sensoralength >= -(p.yspeed + 8) or sensorblength >= -(p.yspeed + 8) then
                     if sensoralength < sensorblength then
                         if sensoralength < 0 then
-                            p.y = p.y + sensoralength
+                            p.y = p.y - 4
                             --       p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensoragroundangle == 366 then
@@ -559,7 +554,7 @@ function love.update(dt)
                         print("A WON")
                     elseif sensorblength < sensoralength then
                         if sensorblength < 0 then
-                            p.y = p.y + sensorblength
+                            p.y = p.y - 4
                             --         p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensorbgroundangle == 366 then
@@ -574,7 +569,7 @@ function love.update(dt)
                         print("B WON")
                     elseif sensoralength == sensorblength then
                         if sensoralength < 0 then
-                            p.y = p.y + sensoralength
+                            p.y = p.y - 4
                             --      p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensoragroundangle == 366 then
@@ -598,7 +593,7 @@ function love.update(dt)
                 if p.yspeed >= 0 then
                     if sensoralength < sensorblength then
                         if sensoralength < 0 then
-                            p.y = p.y + sensoralength
+                            p.y = p.y - 4
                             --   p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensoragroundangle == 366 then
@@ -613,7 +608,6 @@ function love.update(dt)
                         print("A WON")
                     elseif sensorblength < sensoralength then
                         if sensorblength < 0 then
-                            p.y = p.y + sensorblength
                             --  p.groundspeed = p.xspeed
                             p.grounded = true
                             if sensorbgroundangle == 366 then
@@ -628,7 +622,7 @@ function love.update(dt)
                         print("B WON")
                     elseif sensoralength == sensorblength then
                         if sensoralength < 0 then
-                            p.y = p.y + sensoralength
+                            p.y = p.y - 4
                             -- p.groundspeed = 0
                             p.grounded = true
                             if sensoragroundangle == 366 then
