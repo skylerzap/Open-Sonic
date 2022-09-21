@@ -1,9 +1,9 @@
--- ░░░░░██╗░█████╗░███████╗  ███████╗███╗░░██╗░██████╗░██╗███╗░░██╗███████╗
--- ░░░░░██║██╔══██╗██╔════╝  ██╔════╝████╗░██║██╔════╝░██║████╗░██║██╔════╝
--- ░░░░░██║██║░░██║█████╗░░  █████╗░░██╔██╗██║██║░░██╗░██║██╔██╗██║█████╗░░
--- ██╗░░██║██║░░██║██╔══╝░░  ██╔══╝░░██║╚████║██║░░╚██╗██║██║╚████║██╔══╝░░
--- ╚█████╔╝╚█████╔╝███████╗  ███████╗██║░╚███║╚██████╔╝██║██║░╚███║███████╗
--- ░╚════╝░░╚════╝░╚══════╝  ╚══════╝╚═╝░░╚══╝░╚═════╝░╚═╝╚═╝░░╚══╝╚══════╝
+-- ░█████╗░██████╗░███████╗███╗░░██╗  ░██████╗░█████╗░███╗░░██╗██╗░█████╗░
+-- ██╔══██╗██╔══██╗██╔════╝████╗░██║  ██╔════╝██╔══██╗████╗░██║██║██╔══██╗
+-- ██║░░██║██████╔╝█████╗░░██╔██╗██║  ╚█████╗░██║░░██║██╔██╗██║██║██║░░╚═╝
+-- ██║░░██║██╔═══╝░██╔══╝░░██║╚████║  ░╚═══██╗██║░░██║██║╚████║██║██║░░██╗
+-- ╚█████╔╝██║░░░░░███████╗██║░╚███║  ██████╔╝╚█████╔╝██║░╚███║██║╚█████╔╝
+-- ░╚════╝░╚═╝░░░░░╚══════╝╚═╝░░╚══╝  ╚═════╝░░╚════╝░╚═╝░░╚══╝╚═╝░╚════╝░
 -- Prototype Release 1
 -- Made by Evanzap
 function love.load()
@@ -51,62 +51,66 @@ function love.load()
     p.mode = 1
     p.mostdirection = "none"
     -- p.physicsengine=
+    p.sensoraxpos = p.x - p.widthradius
+    p.sensoraypos = p.y + p.heightradius
+    p.sensorbxpos = p.x + p.widthradius
+    p.sensorbypos = p.y + p.heightradius
 end
 
 function sensor(sensorx, sensory, direction)
     if direction == "down" then
-        local tile1, tile2 = testlevel:convertPixelToTile(sensorx, sensory)
+        local tile1, tile2 = testlevel:convertPixelToTile(math.floor(sensorx), math.floor(sensory))
         local tileprops = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2 + 1))
-        local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1), math.floor(tile2))
+        local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2))
         local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2 + 2))
         local tilexpos = math.floor(sensorx) - math.floor(tile1) * 16
         local arraynumber = tostring(tilexpos)
         local sensorlength = 0
         local sensorgroundangle = 0
         if tileprops["solid"] then
-            --                print("Distance From Surface: ".. (tileprops[arraynumber]+math.floor((sensory)-math.floor(tile2+1)*16)))
             sensorlength = (tileprops[arraynumber] + math.floor(sensory) - math.floor(tile2 + 1) * 16) * -1 - 1
             sensorgroundangle = tileprops["angle"]
-        elseif tileprops[arraynumber] == 0 and tilepropsextension[arraynumber] >= 0 then
-            --                    print("B Extension")
+        elseif tileprops[arraynumber] == 0 and tilepropsextension["solid"] then
             sensorlength = math.floor((math.floor(sensory) - math.floor(tile2) * 16) - 16) * -1 - 1 + 16 -
                                tilepropsextension[arraynumber]
             sensorgroundangle = tilepropsextension["angle"]
-            --                    print(sensorgroundangle)
-        elseif tileprops["full"] and tilepropsregression["solid"] == true and tilepropsregression[arraynumber] >= 0 then
-            --                print("Regression")
-            --                print("Distance From Surface: ".. (math.floor(sensory)+tilepropsregression[arraynumber]+math.floor(tile2)*16*-1))
+        elseif tileprops["full"] and tilepropsregression["solid"] then
             sensorlength = (math.floor(sensory) + tilepropsregression[arraynumber] + math.floor(tile2) * 16) * -1
             sensorgroundangle = tilepropsregression["angle"]
+        else
+            sensorlength = 32
         end
         return sensorlength, sensorgroundangle
     elseif direction == "right" then
-        local tile1, tile2 = testlevel:convertPixelToTile(sensorx, sensory)
-        local tileprops = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2+1))
-        local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1), math.floor(tile2+1))
-        local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1 + 2), math.floor(tile2+1))
+        local tile1, tile2 = testlevel:convertPixelToTile(math.floor(sensorx), math.floor(sensory))
+        local tileprops = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2 + 1))
+        local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1 - 0), math.floor(tile2 + 1))
+        local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1 + 2), math.floor(tile2 + 1))
         local tilexpos = -(math.floor(sensory) - math.floor(tile2) * 16 - 16) - 1
         print(tilexpos)
         local arraynumber = "w" .. tostring(tilexpos)
         local sensorlength = 0
-        if tileprops[arraynumber] > 0 and tileprops[arraynumber] < 16 then
-            sensorlength = (-sensorx + math.floor(tile1) * 16 - tileprops[arraynumber]) + 16
+        if tileprops["solid"] and not tileprops["full"] then
+            sensorlength = (-math.floor(sensorx) + math.floor(tile1) * 16 - tileprops[arraynumber]) + 15
             sensorgroundangle = tileprops["angle"]
         elseif tileprops[arraynumber] == 0 and tilepropsextension["solid"] then
             --                    print("B Extension")
-            sensorlength = ((sensorx - math.floor(tile1) * 16)) * -1 - 1 - tilepropsextension[arraynumber] + 32
+            sensorlength = ((math.floor(sensorx) - math.floor(tile1) * 16)) * -1 - 1 - tilepropsextension[arraynumber] +
+                               32
             sensorgroundangle = tilepropsextension["angle"]
-            --                    print("B Length (Extension): ".. sensorblength)
-            --                    print("B ground angle: ".. sensorbgroundangle)
-        elseif tileprops[arraynumber] == 16 and tilepropsregression[arraynumber] > 0 then
-            --                print("Regression")
+            print("extension")
+        elseif tileprops[arraynumber] == 16 and tilepropsregression["solid"] then
+            print("Regression")
             --                print("Distance From Surface: ".. (math.floor(sensory)+tilepropsregression[arraynumber]+math.floor(tile1)*16*-1))
-            sensorlength = (sensorx - math.floor(tile1) * 16 + tilepropsregression[arraynumber])
+            sensorlength = (math.floor(sensorx) - math.floor(tile1) * 16 + tilepropsregression[arraynumber]) - 32 + 16
             sensorgroundangle = tilepropsregression["angle"]
+        end
+        if sensorgroundangle == nil then
+            sensorgroundangle = 0
         end
         return sensorlength, sensorgroundangle
     elseif direction == "up" then
-        local tile1, tile2 = testlevel:convertPixelToTile(sensorx, sensory)
+        local tile1, tile2 = testlevel:convertPixelToTile(math.floor(sensorx), math.floor(sensory))
         local tileprops = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2 + 1))
         local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2))
         local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1), math.floor(tile2 + 2))
@@ -136,30 +140,31 @@ end
 
 function sensorwallfork(sensorx, sensory, direction)
     if direction == "right" then
+        sensorx = sensorx + 15
         local tile1, tile2 = testlevel:convertPixelToTile(sensorx - 15, sensory)
-        local tileprops = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2))
-        local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1), math.floor(tile2))
-        local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1 + 2), math.floor(tile2))
+        local tileprops = testlevel:getTileProperties(1, math.floor(tile1), math.floor(tile2))
+        local tilepropsregression = testlevel:getTileProperties(1, math.floor(tile1 - 1), math.floor(tile2))
+        local tilepropsextension = testlevel:getTileProperties(1, math.floor(tile1 + 1), math.floor(tile2))
         local tilexpos = -(math.floor(sensory) - math.floor(tile2) * 16 - 16) - 1
         print(tilexpos)
         local arraynumber = "w" .. tostring(tilexpos)
         local sensorlength = 0
-        if tileprops[arraynumber] > 0 and tileprops[arraynumber] < 16 then
+        if not tileprops[arraynumber] == 0 and not tileprops[arraynumber] == 16 then
             --        print("Distance From Surface: ".. (tileprops[arraynumber]+math.floor((p.x+p.heightradius)-math.floor(tile1)*16)))
             --                print("Normal B")
             sensorlength = (-sensorx + math.floor(tile1) * 16 - tileprops[arraynumber]) + 16
             sensorgroundangle = tileprops["angle"]
             --                print("B ground angle: ".. sensorbgroundangle)
-        elseif tileprops[arraynumber] == 0 and tilepropsextension["solid"] then
+        elseif tileprops[arraynumber] == 0 then
             --                    print("B Extension")
             sensorlength = ((sensorx - math.floor(tile1) * 16)) * -1 - 1 - tilepropsextension[arraynumber] + 32
             sensorgroundangle = tilepropsextension["angle"]
             --                    print("B Length (Extension): ".. sensorblength)
             --                    print("B ground angle: ".. sensorbgroundangle)
-        elseif tileprops[arraynumber] == 16 and tilepropsregression[arraynumber] > 0 then
-            --                print("Regression")
+        elseif tileprops[arraynumber] == 16 then
+            print("Regression")
             --                print("Distance From Surface: ".. (math.floor(sensory)+tilepropsregression[arraynumber]+math.floor(tile1)*16*-1))
-            sensorlength = (sensorx - math.floor(tile1) * 16 + tilepropsregression[arraynumber])
+            sensorlength = (sensorx - math.floor(tile1) * 16 + tilepropsregression[arraynumber]) - 15
             sensorgroundangle = tilepropsregression["angle"]
         end
         return sensorlength, sensorgroundangle
@@ -231,21 +236,15 @@ function love.update(dt)
         if p.grounded then
             if p.controllocktimer == 0 then
                 if math.abs(p.groundspeed) < 2.5 and p.groundangle > 45 and p.groundangle < 316 then
-                    -- p.grounded=false
-                    -- p.groundspeed = 0
-                    -- p.groundangle=0
-                    -- p.controllocktimer = 30
+                    --p.grounded=false
+                    --p.groundspeed = 0
+                    --p.controllocktimer = 30
                 end
             else
                 p.controllocktimer = p.controllocktimer - 1
             end
         end
         -- Movement System
-        if p.mode == 1 and p.groundangle > 45 then
-            p.mode = 2
-        elseif p.mode == 2 and p.groundangle < 46 then
-            p.mode = 1
-        end
         if p.grounded then
             p.widthradius = 9
             p.heightradius = 19
@@ -255,8 +254,6 @@ function love.update(dt)
                 left = false
                 right = false
             end
-            p.xspeed = p.groundspeed * math.cos(p.groundangle * 0.0174533)
-            p.yspeed = p.groundspeed * -math.sin(p.groundangle * 0.0174533)
             if a or s then
                 p.jumppressed = true
                 p.grounded = false
@@ -322,115 +319,110 @@ function love.update(dt)
                 end
             end
             -- MOVE PLAYER
+            if p.grounded then
+                p.xspeed = p.groundspeed * math.cos(p.groundangle * 0.0174533)
+                p.yspeed = p.groundspeed * -math.sin(p.groundangle * 0.0174533)
+            end
             p.x = p.x + p.xspeed
             p.y = p.y + p.yspeed
-            print(p.yspeed)
-            print(p.mostdirection)
-            if p.mode == 1 then
-                p.sensoraxpos = p.x - p.widthradius
-                p.sensoraypos = p.y + p.heightradius
-                p.sensorbxpos = p.x + p.widthradius
-                p.sensorbypos = p.y + p.heightradius
-            elseif p.mode == 2 then
-                p.sensorbxpos = p.x + p.heightradius
-                p.sensorbypos = p.y + p.widthradius
-                p.sensoraxpos = p.x + p.heightradius
-                p.sensoraypos = p.y - p.widthradius
-            else
-                p.sensoraxpos = p.x - p.widthradius
-                p.sensoraypos = p.y + p.heightradius
-                p.sensorbxpos = p.x + p.widthradius
-                p.sensorbypos = p.y + p.heightradius
-            end
             if p.groundangle >= 360 then
                 p.groundangle = 0
             end
+            if p.groundangle>=0 and p.groundangle<=45 then
+                p.mode=1
+            elseif p.groundangle>=46 and p.groundangle<=134 then
+                p.mode=2
+            end
+
+            if p.mode==1 then
+                p.sensoraxpos=p.x-p.widthradius
+                p.sensoraypos=p.y+p.heightradius
+                p.sensorbxpos=p.x+p.widthradius
+                p.sensorbypos=p.y+p.heightradius
+            elseif p.mode==2 then
+                p.sensoraypos=p.y+p.widthradius
+                p.sensoraxpos=p.x+p.heightradius
+                p.sensorbypos=p.y-p.widthradius
+                p.sensorbxpos=p.x+p.heightradius
+            end
             -- SENSORS A + B
-            if p.grounded then
-                if p.mode == 1 then -- Mode 1 is Floor Mode
-                    -- SENSOR B
-                    sensorblength, sensorbgroundangle = sensor(p.sensorbxpos, p.sensorbypos, "down")
-                    -- SENSOR A
-                    sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "down")
+            if p.mode==1 then -- Mode 1 is Floor Mode
+                -- SENSOR B
+                sensorblength, sensorbgroundangle = sensor(p.sensorbxpos, p.sensorbypos, "down")
+                -- SENSOR A
+                sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "down")
 
-                    if sensoralength < sensorblength then
-                        if sensoralength>14 then
-                            p.grounded=false
-                        else
-                            p.y = p.y + sensoralength
-                        end
-                        if sensoragroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensoragroundangle
-                        end
-                        print(sensoragroundangle)
-                        print("A WON")
-                    elseif sensorblength < sensoralength then
-                        if sensorblength>14 then
-                            p.grounded=false
-                        else
-                            p.y = p.y + sensorblength
-                        end
-                        if sensorbgroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensorbgroundangle
-                        end
-                        print(sensorbgroundangle)
-                        print("B WON")
-                    elseif sensoralength == sensorblength then
-                        if sensoralength>14 then
-                            p.grounded=false
-                        else
-                            p.y = p.y + sensoralength
-                        end
-                        if sensoragroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensoragroundangle
-                        end
-                        print("BOTH WERE EQUAL")
+                if sensoralength < sensorblength then
+                    p.y = p.y + math.floor(sensoralength)
+                    if sensoragroundangle == 366 then
+                        p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                    else
+                        p.groundangle = sensoragroundangle
                     end
-                elseif p.mode == 2 then -- Mode 2 is Right Wall
-                    -- SENSOR B RIGHT WALL
-                    sensorblength, sensorbgroundangle = sensor(p.x + p.heightradius, p.y + p.widthradius, "right")
-                    -- SENSOR A RIGHT WALL
-                    sensoralength, sensoragroundangle = sensor(p.x + p.heightradius, p.y - p.widthradius, "right")
-
-                    if sensoralength < sensorblength then
-                        p.x = p.x + sensoralength
-                        if sensoragroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensoragroundangle
-                        end
-                        print(sensoralength)
-                        print("A WON")
-                    elseif sensorblength < sensoralength then
-                        p.x = p.x + sensorblength
-                        if sensorbgroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensorbgroundangle
-                        end
-                        print(sensorblength)
-                        print("B WON")
-                    elseif sensoralength == sensorblength then
-                        p.x = p.x + sensoralength
-                        if sensoragroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensoragroundangle
-                        end
-                        print(sensoralength)
-                        print("BOTH WERE EQUAL")
+                    print(sensoragroundangle)
+                    print("A WON")
+                elseif sensorblength < sensoralength then
+                    p.y = p.y + math.floor(sensorblength)
+                    if sensorbgroundangle == 366 then
+                        p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                    else
+                        p.groundangle = sensorbgroundangle
                     end
-                elseif mode == "ceiling" then
-
-                elseif mode == "leftwall" then
-
+                    print(sensorbgroundangle)
+                    print("B WON")
+                elseif sensoralength == sensorblength then
+                    p.y = p.y + math.floor(sensoralength)
+                    if sensoragroundangle == 366 then
+                        p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                    else
+                        p.groundangle = sensorbgroundangle
+                    end
+                    print("BOTH WERE EQUAL")
                 end
+            elseif p.mode==2 then -- Mode 2 is Right Wall
+                -- SENSOR B RIGHT WALL
+                sensorblength, sensorbgroundangle = sensor(p.sensorbxpos, p.sensorbypos, "right")
+                -- SENSOR A RIGHT WALL
+                sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "right")
+
+                if sensoralength < sensorblength then
+                    --      if not math.floor(sensoralength) == 0 then
+                    p.x = p.x + math.floor(sensoralength)
+                    if sensoragroundangle == 366 then
+                        p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                    else
+                        p.groundangle = sensoragroundangle
+                    end
+                    --   end
+                    print(sensoralength)
+                    print("A WON")
+                elseif sensorblength < sensoralength then
+                    --     if not math.floor(sensorblength) == 0 then
+                    p.x = p.x + math.floor(sensorblength)
+                    if sensorbgroundangle == 366 then
+                        p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                    else
+                        p.groundangle = sensorbgroundangle
+                    end
+                    -- end
+                    print(sensorblength)
+                    print("B WON")
+                elseif sensoralength == sensorblength then
+                    -- if not math.floor(sensoralength) == 0 then
+                    p.x = p.x + math.floor(sensorblength)
+                    if sensoragroundangle == 366 then
+                        p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                    else
+                        p.groundangle = sensoragroundangle
+                    end
+                    -- end
+                    print(sensoralength)
+                    print("BOTH WERE EQUAL")
+                end
+            elseif mode == "ceiling" then
+
+            elseif mode == "leftwall" then
+
             end
         else
             -- QUADRANT THING
@@ -533,109 +525,131 @@ function love.update(dt)
             p.y = p.y + p.yspeed
             -- APPLY GRAVITY
             p.yspeed = p.yspeed + p.gravityforce
-            -- ROTATE ANGLE TO 0
-            if p.groundangle > 0 and p.groundangle <= 180 then
-                p.groundangle = p.groundangle - 2.8125
-            elseif p.groundangle > 0 and p.groundangle > 180 then
-                p.groundangle = p.groundangle + 2.8125
-            end
 
             -- SENSOR POSITIONS
             p.sensoraxpos = p.x - p.widthradius
             p.sensoraypos = p.y + p.heightradius
             p.sensorbxpos = p.x + p.widthradius
             p.sensorbypos = p.y + p.heightradius
-            -- SENSOR B
-            sensorblength, sensorbgroundangle = sensor(p.sensorbxpos, p.sensorbypos, "down")
-            -- SENSOR A
-            sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "down")
-            --DOWN CHECK
-            if sensoralength >= -(p.yspeed + 8) or sensorblength >= -(p.yspeed + 8) and p.mostdirection=="down" then
-                if sensoralength < sensorblength then
-                    if sensoralength <= 0 then
-                        p.y = p.y + sensoralength
-                        p.groundspeed = p.xspeed
-                        p.grounded = true
-                        if sensoragroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensoragroundangle
-                        end
-                    end
-                    print(sensoragroundangle)
-                    print("A WON")
+            if p.mostdirection == "down" then
+                -- SENSOR B
+                sensorblength, sensorbgroundangle = sensor(p.sensorbxpos, p.sensorbypos, "down")
+                -- SENSOR A
+                sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "down")
+                if sensoralength >= -(p.yspeed + 8) or sensorblength >= -(p.yspeed + 8) then
+                    if sensoralength < sensorblength then
+                        if sensoralength < 0 then
+                            p.y = p.y - 4
+                            --       p.groundspeed = p.xspeed
+                            p.grounded = true
+                            if sensoragroundangle == 366 then
+                                p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                            else
+                                p.groundangle = sensoragroundangle
+                            end
 
-                elseif sensorblength < sensoralength then
-                    if sensorblength <= 0 then
-                        p.y = p.y + sensorblength
-                        p.groundspeed = p.xspeed
-                        p.grounded = true
-                        if sensorbgroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensorbgroundangle
                         end
-                    end
-                    print(sensorbgroundangle)
-                    print("B WON")
 
-                elseif sensoralength == sensorblength then
-                    if sensoralength <= 0 then
-                        p.y = p.y + sensoralength
-                        p.groundspeed = p.xspeed
-                        p.grounded = true
-                        if sensoragroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensoragroundangle
-                        end
-                    end
-                end
-            end
+                        print(sensoragroundangle)
+                        print("A WON")
+                    elseif sensorblength < sensoralength then
+                        if sensorblength < 0 then
+                            p.y = p.y - 4
+                            --         p.groundspeed = p.xspeed
+                            p.grounded = true
+                            if sensorbgroundangle == 366 then
+                                p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                            else
+                                p.groundangle = sensorbgroundangle
+                            end
 
-            if p.yspeed>=0 and p.mostdirection=="left" or p.mostdirection=="right" then
-                if sensoralength < sensorblength then
-                    if sensoralength <= 0 then
-                        p.y = p.y + sensoralength
-                        p.groundspeed = p.xspeed
-                        p.grounded = true
-                        if sensoragroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensoragroundangle
                         end
-                    end
-                    print(sensoragroundangle)
-                    print("A WON")
 
-                elseif sensorblength < sensoralength then
-                    if sensorblength <= 0 then
-                        p.y = p.y + sensorblength
-                        p.groundspeed = p.xspeed
-                        p.grounded = true
-                        if sensorbgroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensorbgroundangle
-                        end
-                    end
-                    print(sensorbgroundangle)
-                    print("B WON")
+                        print(sensorbgroundangle)
+                        print("B WON")
+                    elseif sensoralength == sensorblength then
+                        if sensoralength < 0 then
+                            p.y = p.y - 4
+                            --      p.groundspeed = p.xspeed
+                            p.grounded = true
+                            if sensoragroundangle == 366 then
+                                p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                            else
+                                p.groundangle = sensoragroundangle
+                            end
 
-                elseif sensoralength == sensorblength then
-                    if sensoralength <= 0 then
-                        p.y = p.y + sensoralength
-                        p.groundspeed = p.xspeed
-                        p.grounded = true
-                        if sensoragroundangle == 366 then
-                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
-                        else
-                            p.groundangle = sensoragroundangle
                         end
+
+                        print("BOTH WERE EQUAL")
                     end
                 end
             end
 
+            if p.mostdirection == "left" or p.mostdirection == "right" then
+                -- SENSOR B
+                sensorblength, sensorbgroundangle = sensor(p.sensorbxpos, p.sensorbypos, "down")
+                -- SENSOR A
+                sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "down")
+                if p.yspeed >= 0 then
+                    if sensoralength < sensorblength then
+                        if sensoralength < 0 then
+                            p.y = p.y - 4
+                            --   p.groundspeed = p.xspeed
+                            p.grounded = true
+                            if sensoragroundangle == 366 then
+                                p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                            else
+                                p.groundangle = sensoragroundangle
+                            end
+
+                        end
+
+                        print(sensoragroundangle)
+                        print("A WON")
+                    elseif sensorblength < sensoralength then
+                        if sensorblength < 0 then
+                            --  p.groundspeed = p.xspeed
+                            p.grounded = true
+                            if sensorbgroundangle == 366 then
+                                p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                            else
+                                p.groundangle = sensorbgroundangle
+                            end
+
+                        end
+
+                        print(sensorbgroundangle)
+                        print("B WON")
+                    elseif sensoralength == sensorblength then
+                        if sensoralength < 0 then
+                            p.y = p.y - 4
+                            -- p.groundspeed = 0
+                            p.grounded = true
+                            if sensoragroundangle == 366 then
+                                p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                            else
+                                p.groundangle = sensoragroundangle
+                            end
+
+                        end
+
+                        print("BOTH WERE EQUAL")
+                    end
+                end
+            end
+            -- ROTATE ANGLE TO 0
+            if p.grounded == false then
+                if p.groundangle > 0 and p.groundangle <= 180 then
+                    p.groundangle = p.groundangle - 2.8125
+                elseif p.groundangle > 0 and p.groundangle > 180 then
+                    p.groundangle = p.groundangle + 2.8125
+                end
+            else
+                p.groundangle = 0
+                p.widthradius = 9
+                p.heightradius = 19
+                -- p.y = p.y - 5
+            end
         end
     end
 end

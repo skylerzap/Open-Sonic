@@ -1,4 +1,4 @@
-# Sonic-Joe-Engine
+# Open Sonic (Formerly Sonic-Joe-Engine)
 sonic engine im working on.
 
 Engine is far from usable right now, check back on this project in a month and see if it's usable.
@@ -29,8 +29,16 @@ To enable the running currently, add a line that says "debug=true" to the love.l
 
 # Q&A
 
-Q: What inspired the name of this engine?
+Q: What inspired the name of this engine? (Open Sonic)
+
+A: Well the engine is open source, and it's Sonic.
+
+
+Q: What inspired the name of this engine? (Joe Engine)
 
 A: Joe is a funny word.
 
-note to self: to make the extension work, do this [Y POS WITHIN TILE] + 16 - [HEIGHT OF EXTENSION TILE]
+
+Q: Why use Lua instead of something like GameMaker?
+
+A: I actually don't know.
