@@ -1,3 +1,7 @@
+--Made for Open Sonic by Evanzap
+--Created to mimic the sensor system from the Sonic Genesis games.
+--LICENSE: GNU/GPL v3
+
 sti = require "lib/sti"
 testlevel = sti("maps/testlevel.lua")
 sensorlib= {}
