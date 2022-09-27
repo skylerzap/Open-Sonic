@@ -12,7 +12,6 @@ p.heightradius = 19
 -- width radius = 9
 -- height radius = 14
 p.pushradius = 10
-p.slopefactor = 0
 p.multiplyer = 1
 p.jumpforce = 4.875 * p.multiplyer
 p.accelerationspeed = 0.046875 * p.multiplyer
@@ -44,6 +43,8 @@ p.sensorbxpos = p.x + p.widthradius
 p.sensorbypos = p.y + p.heightradius
 love.graphics.setDefaultFilter('nearest', 'nearest')
 p.sonic = love.graphics.newImage("somic.png")
+local width  = p.sonic:getWidth()
+local height = p.sonic:getHeight()
 
 
 function sensor(a,b,c)
@@ -63,6 +64,10 @@ function p.update()
     local right = love.keyboard.isScancodeDown('right')
     local a = love.keyboard.isScancodeDown('a')
     local s = love.keyboard.isScancodeDown('s')
+    local z = love.keyboard.isScancodeDown('z')
+    if z then
+        p.groundspeed = 6
+    end
     -- Control Lock Attempt
         if p.grounded then
             if p.controllocktimer == 0 then
@@ -80,7 +85,7 @@ function p.update()
             p.widthradius = 9
             p.heightradius = 19
             sonic = love.graphics.newImage("somic.png")
-            p.groundspeed = p.groundspeed - (p.slopefactor * math.sin(p.groundangle * 0.0174533))
+            p.groundspeed = p.groundspeed - (p.slopefactor * math.sin(math.rad(p.groundangle)))
             if p.controllocktimer > 0 then
                 left = false
                 right = false
@@ -88,6 +93,8 @@ function p.update()
             if a or s then
                 p.jumppressed = true
                 p.grounded = false
+                p.widthradius = 9
+                p.heightradius = 14
                 p.xspeed = p.xspeed - p.jumpforce * math.sin(math.rad(p.groundangle))
                 p.yspeed = p.yspeed - p.jumpforce * math.cos(math.rad(p.groundangle))
             end
@@ -243,14 +250,52 @@ function p.update()
                     end
                 else
                     print("NO GROUND")
-                    --p.grounded = false
+                    p.grounded = false
                 end
                 print("TEST")
                 print(sensoralength)
-            elseif mode == "ceiling" then
-
-            elseif mode == "leftwall" then
-
+            elseif p.groundangle >= 135 and p.groundangle <= 225 then
+                p.sensoraxpos = p.x - p.widthradius
+                p.sensoraypos = p.y - p.heightradius
+                p.sensorbxpos = p.x + p.widthradius
+                p.sensorbypos = p.y - p.heightradius
+                -- SENSOR B
+                sensorblength, sensorbgroundangle = sensor(p.sensorbxpos, p.sensorbypos, "up")
+                -- SENSOR A
+                sensoralength, sensoragroundangle = sensor(p.sensoraxpos, p.sensoraypos, "up")
+                if math.abs(sensoralength) <= 14 or math.abs(sensorblength) <= 14 then
+                    if sensoralength < sensorblength then
+                        p.y = p.y - math.floor(sensoralength)
+                        if sensoragroundangle == 366 then
+                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                        else
+                            p.groundangle = sensoragroundangle
+                        end
+                        print(sensoragroundangle)
+                        print("A WON")
+                    elseif sensorblength < sensoralength then
+                        p.y = p.y - math.floor(sensorblength)
+                        if sensorbgroundangle == 366 then
+                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                        else
+                            p.groundangle = sensorbgroundangle
+                        end
+                        print(sensorbgroundangle)
+                        print("B WON")
+                    elseif sensoralength == sensorblength then
+                        p.y = p.y - math.floor(sensoralength)
+                        if sensoragroundangle == 366 then
+                            p.groundangle = math.floor(p.groundangle / 90 + 0.5) * 90
+                        else
+                            p.groundangle = sensorbgroundangle
+                        end
+                        print("BOTH WERE EQUAL")
+                    end
+                else
+                    p.grounded = false
+                end
+            else
+                p.groundangle=0
             end
         else
             -- QUADRANT THING
@@ -273,9 +318,6 @@ function p.update()
             end
             -- AIR CODE
             sonic = love.graphics.newImage("ballsomic.png")
-            p.widthradius = 7
-            p.heightradius = 14
-            p.mode = 1
             -- JUMP BUTTON RELEASE
             if p.jumppressed == true and not a and not s then
                 p.jumppressed = false
@@ -486,7 +528,7 @@ function p.update()
 
     function p.draw()
         love.graphics.scale(2, 2)
-        love.graphics.draw(p.sonic, p.x - p.widthradius - 7 - 8 * 16, p.y - p.heightradius)
+        love.graphics.draw(p.sonic, p.x-8*16, p.y, math.rad(-p.groundangle),nil, nil, width/2, height/2 )
         love.graphics.setColor(1, 1, 1)
         testlevel:draw(-8 * 16, 0, 2, 2)
         love.graphics.setColor(0, 1, 0)

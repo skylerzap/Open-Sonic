@@ -66,20 +66,17 @@ function sensorlib.sensor(sensorx, sensory, direction)
         local sensorlength = 0
         local sensorgroundangle = 0
         if tileprops["solid"] then
-            --                print("Distance From Surface: ".. (tileprops[arraynumber]+math.floor((sensory)-math.floor(tile2+1)*16)))
-            sensorlength = (tileprops[arraynumber] + math.floor(sensory) - math.floor(tile2 + 1) * 16) * -1 - 1
+            sensorlength = (tileprops[arraynumber] - math.floor(sensory) + math.floor(tile2 + 1) * 16) * -1 +16
             sensorgroundangle = tileprops["angle"]
-        elseif tileprops[arraynumber] == 0 and tilepropsextension[arraynumber] >= 0 then
-            --                    print("B Extension")
+        elseif tileprops[arraynumber] == 0 and tilepropsextension["solid"] then
             sensorlength = math.floor((math.floor(sensory) - math.floor(tile2) * 16) - 16) * -1 - 1 + 16 -
                                tilepropsextension[arraynumber]
             sensorgroundangle = tilepropsextension["angle"]
-            --                    print(sensorgroundangle)
-        elseif tileprops["full"] and tilepropsregression["solid"] == true and tilepropsregression[arraynumber] >= 0 then
-            --                print("Regression")
-            --                print("Distance From Surface: ".. (math.floor(sensory)+tilepropsregression[arraynumber]+math.floor(tile2)*16*-1))
+        elseif tileprops["full"] and tilepropsregression["solid"] then
             sensorlength = (math.floor(sensory) + tilepropsregression[arraynumber] + math.floor(tile2) * 16) * -1
             sensorgroundangle = tilepropsregression["angle"]
+        else
+            sensorlength = 32
         end
         return sensorlength, sensorgroundangle
     end
